@@ -1,0 +1,8 @@
+*
+
+!/Source/
+!/Source/Quest/
+
+!.gitignore
+!/Source/Quest/QuestManager.cpp
+!/Source/Quest/QuestManager.h
