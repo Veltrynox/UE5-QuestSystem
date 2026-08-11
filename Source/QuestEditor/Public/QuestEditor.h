@@ -7,8 +7,6 @@
 /**
  * FQuestEditorModule
  * Main editor module implementation interface for the QuestEditor module.
- * Responsible for initializing editor extensions, registering custom AssetTypeActions,
- * and cleaning up editor resources when the module is unloaded.
  */
 class FQuestEditorModule : public IModuleInterface
 {

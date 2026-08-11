@@ -18,9 +18,9 @@ void FAssetTypeActions_QuestGraph::OpenAssetEditor(const TArray<UObject*>& InObj
 {
 	const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid() ? EToolkitMode::WorldCentric : EToolkitMode::Standalone;
 
-	for (auto ObjIt = InObjects.CreateConstIterator(); ObjIt; ++ObjIt)
+	if (InObjects.Num() > 0)
 	{
-		if (UQuestGraph* QuestGraph = Cast<UQuestGraph>(*ObjIt))
+		if (UQuestGraph* QuestGraph = Cast<UQuestGraph>(InObjects[0]))
 		{
 			TSharedRef<FQuestGraphAssetEditor> NewEditor = MakeShared<FQuestGraphAssetEditor>();
 			NewEditor->InitQuestGraphAssetEditor(Mode, EditWithinLevelEditor, QuestGraph);
