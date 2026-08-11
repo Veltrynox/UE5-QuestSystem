@@ -1,8 +1,14 @@
 *
 
-!/Source/
-!/Source/Quest/
-
 !.gitignore
-!/Source/Quest/QuestManager.cpp
-!/Source/Quest/QuestManager.h
+!*.uproject
+
+# Allow all source code files recursively
+!/Source/
+!/Source/**
+
+# Allow config files if needed
+!/Config/
+!/Config/**
+
+
