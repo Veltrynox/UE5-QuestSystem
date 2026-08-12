@@ -19,7 +19,6 @@ enum class EQuestStatus : uint8
  * UQuestNode
  * Runtime data object representing a single step/objective within a Quest Graph.
  * 
- * Unlike UEdGraphNode_Quest (which handles visual graph rendering in the Editor),
  * UQuestNode exists at runtime in the game to track quest logic, objectives, 
  * current status, and connections to subsequent child quest steps.
  */
@@ -45,9 +44,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest Node")
 	TArray<TObjectPtr<UQuestNode>> ChildNodes;
 
+#if WITH_EDITORONLY_DATA
 	/** Color tint used for the node header on the visual graph canvas */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest Node")
 	FLinearColor NodeColor = FLinearColor(0.2f, 0.65f, 0.35f, 1.0f);
+#endif
 
 	/** Indicates if this node is an initial root step for a quest chain */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest Node")

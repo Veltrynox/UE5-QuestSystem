@@ -39,9 +39,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Quests")
 	void StartQuestGraph(UQuestGraph* GraphToStart);
 
-	/** Advances and completes the active step matching StepID */
 	UFUNCTION(BlueprintCallable, Category = "Quests")
 	bool AdvanceStep(FName StepID);
+
+	UFUNCTION(BlueprintCallable, Category = "Quests")
+	bool AdvanceNode(UQuestNode* NodeToComplete);
 
 	/** Handles player interaction with a world object matching ObjectTag */
 	UFUNCTION(BlueprintCallable, Category = "Quests")
@@ -50,4 +52,6 @@ public:
 	/** Deprecated goal completion delegate trigger */
 	UFUNCTION(BlueprintCallable, Category = "Quests")
 	void CompleteGoal(FName GoalID);
+	
+	
 };

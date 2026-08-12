@@ -26,7 +26,7 @@ bool UQuestManager::OnObjectInteracted(FName ObjectTag)
 			UE_LOG(LogTemp, Warning, TEXT("QuestManager: Found matching active quest step '%s' for object '%s'!"), 
 				*ActiveNode->StepID.ToString(), *ObjectTag.ToString());
 
-			return AdvanceStep(ActiveNode->StepID);
+			return AdvanceNode(ActiveNode);
 		}
 	}
 
@@ -58,40 +58,37 @@ void UQuestManager::StartQuestGraph(UQuestGraph* GraphToStart)
 			RootNode->Status = EQuestStatus::InProgress;
 			ActiveNodes.Add(RootNode);
 			UE_LOG(LogTemp, Warning, TEXT("=== QUEST STARTED! Active Step: %s ==="), *RootNode->StepID.ToString());
+			
+			if (GEngine)
+			{
+				FString Msg = FString::Printf(TEXT("=== QUEST STARTED: %s ==="), *RootNode->StepID.ToString());
+				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Msg, true, FVector2D(1.8f, 1.8f));
+			}
 		}
 	}
 }
 
-bool UQuestManager::AdvanceStep(FName StepID)
+bool UQuestManager::AdvanceNode(UQuestNode* NodeToComplete)
 {
-	if (StepID.IsNone()) return false;
+	if (!NodeToComplete) return false;
 
-	UQuestNode* NodeToComplete = nullptr;
-	int32 NodeIndex = INDEX_NONE;
-
-	// Search active nodes list for matching StepID
-	for (int32 i = 0; i < ActiveNodes.Num(); ++i)
+	int32 NodeIndex = ActiveNodes.IndexOfByKey(NodeToComplete);
+	if (NodeIndex == INDEX_NONE)
 	{
-		if (ActiveNodes[i] && ActiveNodes[i]->StepID == StepID)
-		{
-			NodeToComplete = ActiveNodes[i];
-			NodeIndex = i;
-			break;
-		}
-	}
-
-	if (!NodeToComplete)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("QuestManager: Step %s is NOT currently active!"), *StepID.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("QuestManager: Node %s is NOT currently active!"), *NodeToComplete->StepID.ToString());
 		return false;
 	}
 
-	// Complete current step and remove from active list
 	NodeToComplete->Status = EQuestStatus::Completed;
 	ActiveNodes.RemoveAt(NodeIndex);
-	UE_LOG(LogTemp, Warning, TEXT("=== STEP COMPLETED: %s ==="), *StepID.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("=== STEP COMPLETED: %s ==="), *NodeToComplete->StepID.ToString());
 
-	// Activate all subsequent child nodes
+	if (GEngine)
+	{
+		FString Msg = FString::Printf(TEXT("STEP COMPLETED: %s"), *NodeToComplete->StepID.ToString());
+		GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, Msg, true, FVector2D(1.8f, 1.8f));
+	}
+	
 	for (UQuestNode* ChildNode : NodeToComplete->ChildNodes)
 	{
 		if (ChildNode)
@@ -102,11 +99,31 @@ bool UQuestManager::AdvanceStep(FName StepID)
 		}
 	}
 
-	// Check if all steps in the graph have been completed
 	if (ActiveNodes.Num() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("=== ALL QUEST STEPS COMPLETED! QUEST FINISHED! ==="));
+		
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 7.0f, FColor::Yellow, TEXT("🎉 ALL QUEST STEPS COMPLETED!"), true, FVector2D(2.0f, 2.0f));
+		}
 	}
 
 	return true;
+}
+
+bool UQuestManager::AdvanceStep(FName StepID)
+{
+	if (StepID.IsNone()) return false;
+
+	for (UQuestNode* ActiveNode : ActiveNodes)
+	{
+		if (ActiveNode && ActiveNode->StepID == StepID)
+		{
+			return AdvanceNode(ActiveNode);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("QuestManager: Step %s is NOT currently active!"), *StepID.ToString());
+	return false;
 }
