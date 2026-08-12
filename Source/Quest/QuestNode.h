@@ -44,4 +44,16 @@ public:
 	/** Direct links to subsequent quest steps triggered after completing this step */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest Node")
 	TArray<TObjectPtr<UQuestNode>> ChildNodes;
+
+	/** Color tint used for the node header on the visual graph canvas */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest Node")
+	FLinearColor NodeColor = FLinearColor(0.2f, 0.65f, 0.35f, 1.0f);
+
+	/** Indicates if this node is an initial root step for a quest chain */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest Node")
+	bool bIsRootNode = false;
+
+	/** Object tag identifier required to complete this objective */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Objective")
+	FName TargetTag;
 };
