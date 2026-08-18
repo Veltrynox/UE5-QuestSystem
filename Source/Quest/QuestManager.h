@@ -49,9 +49,31 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Quests")
 	bool OnObjectInteracted(FName ObjectTag);
 
+	/** Set of active world tags / flags (e.g. "IsEnemyOfCity", "HasCellarKey") */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quests")
+	TSet<FName> ActiveWorldTags;
+
+	/** Adds a world tag to ActiveWorldTags set */
+	UFUNCTION(BlueprintCallable, Category = "Quests")
+	void AddWorldTag(FName Tag);
+
+	/** Removes a world tag from ActiveWorldTags set */
+	UFUNCTION(BlueprintCallable, Category = "Quests")
+	void RemoveWorldTag(FName Tag);
+
+	/** Checks if a world tag is currently active */
+	UFUNCTION(BlueprintPure, Category = "Quests")
+	bool HasWorldTag(FName Tag) const;
+
+	/** Saves current quest graph execution state and active world tags to a JSON file */
+	UFUNCTION(BlueprintCallable, Category = "Quests|Save")
+	bool SaveQuestProgressToJson(const FString& SlotName = TEXT("QuestSave"));
+
+	/** Loads quest graph execution state and active world tags from a JSON save file */
+	UFUNCTION(BlueprintCallable, Category = "Quests|Save")
+	bool LoadQuestProgressFromJson(const FString& SlotName = TEXT("QuestSave"));
+
 	/** Deprecated goal completion delegate trigger */
 	UFUNCTION(BlueprintCallable, Category = "Quests")
 	void CompleteGoal(FName GoalID);
-	
-	
 };
