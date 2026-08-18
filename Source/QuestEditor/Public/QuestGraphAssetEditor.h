@@ -47,6 +47,9 @@ private:
 	/** Callback triggered when any property is modified in the details view */
 	void OnPropertyChanged(const FPropertyChangedEvent& PropertyChangedEvent);
 	
+	/** Callback triggered when text is committed on any graph node (e.g. comment frame box header) */
+	void OnNodeTextCommitted(const FText& InText, ETextCommit::Type CommitInfo, UEdGraphNode* Node);
+	
 	/** Reference to the Slate graph editor widget */
 	TSharedPtr<SGraphEditor> GraphWidget;
 

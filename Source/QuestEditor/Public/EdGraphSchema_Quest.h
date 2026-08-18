@@ -20,6 +20,33 @@ struct FEdGraphSchemaAction_NewQuestNode : public FEdGraphSchemaAction
 	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2f& Location, bool bSelectNewNode = true) override;
 };
 
+/**
+ * FEdGraphSchemaAction_NewQuestStartNode
+ * Action class executed when selecting "Add Quest Start Node" from the graph context menu.
+ */
+USTRUCT()
+struct FEdGraphSchemaAction_NewQuestStartNode : public FEdGraphSchemaAction
+{
+	GENERATED_BODY()
+
+	FEdGraphSchemaAction_NewQuestStartNode() : FEdGraphSchemaAction() {}
+	FEdGraphSchemaAction_NewQuestStartNode(FText InNodeCategory, FText InMenuDesc, FText InToolTip, const int32 InGrouping)
+		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping) {}
+
+	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2f& Location, bool bSelectNewNode = true) override;
+};
+
+USTRUCT()
+struct FEdGraphSchemaAction_NewQuestEndNode : public FEdGraphSchemaAction
+{
+	GENERATED_BODY()
+
+	FEdGraphSchemaAction_NewQuestEndNode() : FEdGraphSchemaAction() {}
+	FEdGraphSchemaAction_NewQuestEndNode(FText InNodeCategory, FText InMenuDesc, FText InToolTip, const int32 InGrouping)
+		: FEdGraphSchemaAction(InNodeCategory, InMenuDesc, InToolTip, InGrouping) {}
+
+	virtual UEdGraphNode* PerformAction(class UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2f& Location, bool bSelectNewNode = true) override;
+};
 
 /**
  * UEdGraphSchema_Quest
