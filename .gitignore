@@ -1,14 +1,9 @@
 # Ignore everything by default
 *
 
-# Allow gitignore, project descriptor, and README
+# Allow gitignore and README
 !.gitignore
 !README.md
-!*.uproject
-
-# Allow project target source stubs
-!/Source/
-!/Source/**
 
 # Allow QuestSystem plugin
 !/Plugins/
