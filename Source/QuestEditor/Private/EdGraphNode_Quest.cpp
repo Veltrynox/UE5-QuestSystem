@@ -6,26 +6,27 @@ void UEdGraphNode_Quest::NodeConnectionListChanged()
 	
 	if (!QuestNode) return;
 
-	// Update root node status based on input pin connections
-	UEdGraphPin* InputPin = GetPinAt(0);
+	// Find the input pin
+	UEdGraphPin* InputPin = FindPin(FName("In"), EGPD_Input);
 	if (InputPin)
 	{
 		QuestNode->bIsRootNode = (InputPin->LinkedTo.Num() == 0);
 	}
 	
-	// Update child node links from output pin connections
+	// Find the output pin
 	QuestNode->ChildNodes.Empty();
-	UEdGraphPin* OutputPin = GetPinAt(1);
-	if (!OutputPin) return;
-	
-	for (UEdGraphPin* LinkedPin : OutputPin->LinkedTo)
+	UEdGraphPin* OutputPin = FindPin(FName("Out"), EGPD_Output);
+	if (OutputPin)
 	{
-		if (!LinkedPin) continue;
-		UEdGraphNode* OwningNode = LinkedPin->GetOwningNode();
-		UEdGraphNode_Quest* TargetEdNode = Cast<UEdGraphNode_Quest>(OwningNode);
-		if (TargetEdNode && TargetEdNode->QuestNode)
+		for (UEdGraphPin* LinkedPin : OutputPin->LinkedTo)
 		{
-			QuestNode->ChildNodes.Add(TargetEdNode->QuestNode);
+			if (!LinkedPin) continue;
+			UEdGraphNode* OwningNode = LinkedPin->GetOwningNode();
+			UEdGraphNode_Quest* TargetEdNode = Cast<UEdGraphNode_Quest>(OwningNode);
+			if (TargetEdNode && TargetEdNode->QuestNode)
+			{
+				QuestNode->ChildNodes.AddUnique(TargetEdNode->QuestNode);
+			}
 		}
 	}
 }
@@ -43,6 +44,12 @@ FText UEdGraphNode_Quest::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
 	if (QuestNode && !QuestNode->StepID.IsNone())
 	{
+#if WITH_EDITORONLY_DATA
+		if (QuestNode->bIsMainQuest)
+		{
+			return FText::FromString(FString::Printf(TEXT("⭐ [MAIN QUEST] %s"), *QuestNode->StepID.ToString()));
+		}
+#endif
 		return FText::FromName(QuestNode->StepID);
 	}
 
@@ -53,6 +60,13 @@ FLinearColor UEdGraphNode_Quest::GetNodeTitleColor() const
 {
 	if (QuestNode)
 	{
+#if WITH_EDITORONLY_DATA
+		if (QuestNode->bIsMainQuest)
+		{
+			// Royal purple tint for main story quest milestones
+			return FLinearColor(0.55f, 0.15f, 0.75f, 1.0f);
+		}
+#endif
 		return QuestNode->NodeColor;
 	}
 

@@ -30,7 +30,7 @@ void UEdGraph_Quest::RebuildQuestGraph()
 				
 				// Rebuild child node connections from visual pin links
 				QuestNode->ChildNodes.Empty();
-				UEdGraphPin* OutputPin = QuestEdNode->GetPinAt(1);
+				UEdGraphPin* OutputPin = QuestEdNode->FindPin(FName("Out"), EGPD_Output);
 				if (OutputPin)
 				{
 					for (UEdGraphPin* LinkedPin : OutputPin->LinkedTo)
@@ -39,11 +39,14 @@ void UEdGraph_Quest::RebuildQuestGraph()
 						{
 							if (TargetEdNode->QuestNode)
 							{
-								QuestNode->ChildNodes.Add(TargetEdNode->QuestNode);
+								QuestNode->ChildNodes.AddUnique(TargetEdNode->QuestNode);
 							}
 						}
 					}
 				}
+
+				UE_LOG(LogTemp, Warning, TEXT("RebuildQuestGraph: Node '%s' (bIsRootNode: %d) -> ChildNodes Count: %d"),
+					*QuestNode->StepID.ToString(), QuestNode->bIsRootNode, QuestNode->ChildNodes.Num());
 			}
 		}
 	}

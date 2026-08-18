@@ -2,6 +2,9 @@
 #include "EdGraphNode_Quest.h"
 #include "Quest/QuestNode.h"
 #include "EdGraph/EdGraph.h"
+#include "EdGraphNode_QuestStart.h"
+#include "EdGraphNode_QuestEnd.h"
+#include "EdGraphNode_Comment.h"
 
 UEdGraphNode* FEdGraphSchemaAction_NewQuestNode::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2f& Location, bool bSelectNewNode)
 {
@@ -44,11 +47,31 @@ void UEdGraphSchema_Quest::GetGraphContextActions(FGraphContextMenuBuilder& Cont
 	Super::GetGraphContextActions(ContextMenuBuilder);
 
 	const FText Category = FText::FromString(TEXT("Quest Graph"));
+
+	const FText StartMenuDesc = FText::FromString(TEXT("Add Quest Start Node"));
+	const FText StartToolTip = FText::FromString(TEXT("Create a golden entry point start node in this graph"));
+	TSharedPtr<FEdGraphSchemaAction_NewQuestStartNode> StartAction = MakeShared<FEdGraphSchemaAction_NewQuestStartNode>(Category, StartMenuDesc, StartToolTip, 0);
+	ContextMenuBuilder.AddAction(StartAction);
+
+	const FText EndMenuDesc = FText::FromString(TEXT("Add Quest End Node"));
+	const FText EndToolTip = FText::FromString(TEXT("Create a red terminal end node in this graph"));
+	TSharedPtr<FEdGraphSchemaAction_NewQuestEndNode> EndAction = MakeShared<FEdGraphSchemaAction_NewQuestEndNode>(Category, EndMenuDesc, EndToolTip, 1);
+	ContextMenuBuilder.AddAction(EndAction);
+	
 	const FText MenuDesc = FText::FromString(TEXT("Add Quest Step Node"));
 	const FText ToolTip = FText::FromString(TEXT("Create a new quest step node in this graph"));
-
-	TSharedPtr<FEdGraphSchemaAction_NewQuestNode> Action = MakeShared<FEdGraphSchemaAction_NewQuestNode>(Category, MenuDesc, ToolTip, 0);
+	TSharedPtr<FEdGraphSchemaAction_NewQuestNode> Action = MakeShared<FEdGraphSchemaAction_NewQuestNode>(Category, MenuDesc, ToolTip, 2);
 	ContextMenuBuilder.AddAction(Action);
+
+	// Add Comment Node Action
+	const FText CommentCategory = FText::FromString(TEXT("Organize"));
+	const FText CommentMenuDesc = FText::FromString(TEXT("Add Comment Block"));
+	const FText CommentToolTip = FText::FromString(TEXT("Create a resizable comment box frame to organize quest nodes"));
+	TSharedPtr<FEdGraphSchemaAction_NewNode> CommentAction = MakeShared<FEdGraphSchemaAction_NewNode>(CommentCategory, CommentMenuDesc, CommentToolTip, 0);
+	CommentAction->NodeTemplate = NewObject<UEdGraphNode_Comment>();
+	CommentAction->NodeTemplate->NodeComment = TEXT("Quest Chapter / Notes");
+	
+	ContextMenuBuilder.AddAction(CommentAction);
 }
 
 
@@ -75,4 +98,62 @@ const FPinConnectionResponse UEdGraphSchema_Quest::CanCreateConnection(const UEd
 FLinearColor UEdGraphSchema_Quest::GetPinTypeColor(const FEdGraphPinType& PinType) const
 {
 	return FLinearColor(0.2f, 0.8f, 0.4f, 1.0f);
+}
+
+UEdGraphNode* FEdGraphSchemaAction_NewQuestStartNode::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2f& Location, bool bSelectNewNode)
+{
+	ParentGraph->Modify();
+
+	// Instantiate golden visual start node object
+	UEdGraphNode_QuestStart* NewNode = NewObject<UEdGraphNode_QuestStart>(ParentGraph);
+	NewNode->CreateNewGuid();
+	NewNode->NodePosX = Location.X;
+	NewNode->NodePosY = Location.Y;
+
+	// Instantiate underlying runtime data object flagged as a root node
+	UQuestNode* NewQuestNode = NewObject<UQuestNode>(ParentGraph->GetOuter(), NAME_None, RF_Transactional);
+	NewQuestNode->StepID = FName(*FString::Printf(TEXT("Start_%d"), FMath::RandRange(100, 999)));
+	NewQuestNode->bIsRootNode = true;
+	NewQuestNode->NodeColor = NewNode->GetNodeTitleColor();
+	NewNode->QuestNode = NewQuestNode;
+
+	// Allocate pins and register node with graph
+	NewNode->AllocateDefaultPins();
+	ParentGraph->AddNode(NewNode, true, bSelectNewNode);
+
+	if (FromPin)
+	{
+		NewNode->GetSchema()->TryCreateConnection(FromPin, NewNode->GetPinAt(0));
+	}
+
+	return NewNode;
+}
+
+UEdGraphNode* FEdGraphSchemaAction_NewQuestEndNode::PerformAction(UEdGraph* ParentGraph, UEdGraphPin* FromPin, const FVector2f& Location, bool bSelectNewNode)
+{
+	ParentGraph->Modify();
+
+	// Instantiate red visual terminal end node object
+	UEdGraphNode_QuestEnd* NewNode = NewObject<UEdGraphNode_QuestEnd>(ParentGraph);
+	NewNode->CreateNewGuid();
+	NewNode->NodePosX = Location.X;
+	NewNode->NodePosY = Location.Y;
+
+	// Instantiate underlying runtime data object
+	UQuestNode* NewQuestNode = NewObject<UQuestNode>(ParentGraph->GetOuter(), NAME_None, RF_Transactional);
+	NewQuestNode->StepID = FName(*FString::Printf(TEXT("End_%d"), FMath::RandRange(100, 999)));
+	NewQuestNode->bIsRootNode = false;
+	NewQuestNode->NodeColor = NewNode->GetNodeTitleColor();
+	NewNode->QuestNode = NewQuestNode;
+
+	// Allocate pins and register node with graph
+	NewNode->AllocateDefaultPins();
+	ParentGraph->AddNode(NewNode, true, bSelectNewNode);
+
+	if (FromPin)
+	{
+		NewNode->GetSchema()->TryCreateConnection(FromPin, NewNode->GetPinAt(0));
+	}
+
+	return NewNode;
 }

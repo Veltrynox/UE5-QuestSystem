@@ -84,6 +84,7 @@ TSharedRef<SDockTab> FQuestGraphAssetEditor::SpawnTab_GraphCanvas(const FSpawnTa
 {
 	SGraphEditor::FGraphEditorEvents Events;
 	Events.OnSelectionChanged = SGraphEditor::FOnSelectionChanged::CreateSP(this, &FQuestGraphAssetEditor::OnSelectedNodesChanged);
+	Events.OnTextCommitted = FOnNodeTextCommitted::CreateSP(this, &FQuestGraphAssetEditor::OnNodeTextCommitted);
 	
 	SAssignNew(GraphWidget, SGraphEditor)
 		.AdditionalCommands(GetToolkitCommands())
@@ -142,6 +143,21 @@ void FQuestGraphAssetEditor::OnPropertyChanged(const FPropertyChangedEvent& Prop
 	if (EdGraph)
 	{
 		EdGraph->NotifyGraphChanged();
+	}
+}
+
+void FQuestGraphAssetEditor::OnNodeTextCommitted(const FText& InText, ETextCommit::Type CommitInfo, UEdGraphNode* Node)
+{
+	if (Node)
+	{
+		const FScopedTransaction Transaction(NSLOCTEXT("QuestEditor", "EditNodeComment", "Edit Node Comment"));
+		Node->Modify();
+		Node->OnUpdateCommentText(InText.ToString());
+
+		if (EdGraph)
+		{
+			EdGraph->NotifyGraphChanged();
+		}
 	}
 }
 
