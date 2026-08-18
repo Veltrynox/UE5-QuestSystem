@@ -1,14 +1,25 @@
+# Ignore everything by default
 *
 
+# Allow gitignore, project descriptor, and README
 !.gitignore
+!README.md
 !*.uproject
 
-# Allow all source code files recursively
+# Allow project target source stubs
 !/Source/
 !/Source/**
 
-# Allow config files if needed
-!/Config/
-!/Config/**
+# Allow QuestSystem plugin
+!/Plugins/
+!/Plugins/QuestSystem/
+!/Plugins/QuestSystem/**
 
-
+# Exclude build artifacts
+/Plugins/QuestSystem/Binaries/
+/Plugins/QuestSystem/Intermediate/
+/Plugins/QuestSystem/DerivedDataCache/
+/Binaries/
+/Intermediate/
+/DerivedDataCache/
+/Saved/
